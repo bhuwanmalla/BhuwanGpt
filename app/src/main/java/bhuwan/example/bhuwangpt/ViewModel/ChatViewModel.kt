@@ -18,21 +18,24 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository) 
     private val _data = MutableLiveData<MyGptResponse?>()
     val data: LiveData<MyGptResponse?> = _data
 
+    private val _isLoading = MutableLiveData<Boolean>(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
     fun fetchChatGptData(apiData: GptRequest) {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
                 val response =
                     repository.getGptResponse(
-                        "YOUR_API_KEY",
+                        "Bearer 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",
                         apiData
                     )
-
-//                Bearer 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
                 Log.e("Data", response.get(0).generated_text)
                 _data.value = response
             } catch (e: Exception) {
                 _data.value = null
             }
+            _isLoading.value = false
         }
     }
 

@@ -2,6 +2,7 @@ package bhuwan.example.bhuwangpt
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -22,9 +23,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: Adapter
     private var myRecyclerViewList = mutableListOf<ChatClass>()
     private lateinit var viewModel: ChatViewModel
-//    private val viewModel: ChatViewModel by viewModels {
-//        ChatViewModelFactory(ChatRepository(RetrofitInstance.service))
-//    }
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,19 +31,25 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         viewModel = ViewModelProvider(this)[ChatViewModel::class.java]
 
-
         setUpRecyclerView()
         observeData()
 
-
-
         binding.imageButton.setOnClickListener {
             val value = binding.editTextText.text.toString()
-            if (value.isNotEmpty()){
-                viewModel.fetchChatGptData(GptRequest(value))
+            if (value.isNotEmpty()) {
+                myRecyclerViewList.add(ChatClass(value, false))
+                adapter.notifyDataSetChanged()
+                binding.recyclerView.scrollToPosition(myRecyclerViewList.size - 1)
                 binding.editTextText.text.clear()
+                viewModel.fetchChatGptData(GptRequest(value))
             }
         }
+    }
+
+    private fun setUpRecyclerView() {
+        adapter = Adapter(myRecyclerViewList, this)
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
     }
 
     private fun observeData() {
@@ -57,11 +61,9 @@ class MainActivity : AppCompatActivity() {
                 binding.recyclerView.scrollToPosition(myRecyclerViewList.size - 1)
             }
         })
-    }
 
-    private fun setUpRecyclerView() {
-        adapter = Adapter(myRecyclerViewList, this)
-        binding.recyclerView.adapter = adapter
-        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        viewModel.isLoading.observe(this, Observer { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        })
     }
 }
