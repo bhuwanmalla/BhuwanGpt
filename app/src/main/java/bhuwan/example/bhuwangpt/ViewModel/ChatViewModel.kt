@@ -27,7 +27,7 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository) 
             try {
                 val response =
                     repository.getGptResponse(
-                        "Bearer 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",
+                        "USE_YOUR_API_KEY",
                         apiData
                     )
                 Log.e("Data", response.get(0).generated_text)
